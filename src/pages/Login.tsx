@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { BookOpen } from 'lucide-react';
@@ -21,12 +21,22 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [goWelcome, setGoWelcome] = useState(false);
   const { login, register, currentUser } = useAuth();
   const navigate = useNavigate();
+  const hasSubmitted = useRef(false);
 
+  // If someone lands on the login page while already signed in, skip past it.
+  // The ref stops this from fighting the post-login redirect to /welcome.
   useEffect(() => {
-    if (currentUser) navigate('/', { replace: true });
+    if (currentUser && !hasSubmitted.current) navigate('/dashboard', { replace: true });
   }, [currentUser, navigate]);
+
+  // After a fresh login/register, wait until the user is in context, then
+  // head to the welcome screen (avoids a bounce back to /login).
+  useEffect(() => {
+    if (currentUser && goWelcome) navigate('/welcome', { replace: true });
+  }, [currentUser, goWelcome, navigate]);
 
   const switchMode = (next: 'login' | 'signup') => {
     setError('');
@@ -39,13 +49,15 @@ export const Login: React.FC = () => {
     setError('');
     setLoading(true);
     try {
+      hasSubmitted.current = true;
       if (mode === 'login') {
         await login(email, password);
       } else {
         await register(name, email, password, 'student');
       }
-      navigate('/');
+      setGoWelcome(true);
     } catch (err) {
+      hasSubmitted.current = false;
       setError(friendlyError(err));
     } finally {
       setLoading(false);

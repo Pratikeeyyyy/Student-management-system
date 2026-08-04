@@ -700,6 +700,84 @@ a:hover {
   height: 16px;
 }
 
+/* ---------- Landing & welcome ---------- */
+
+.landing {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.landing-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4rem;
+}
+
+.landing-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  letter-spacing: -0.02em;
+}
+
+.landing-hero {
+  text-align: center;
+  margin: 0 auto 4rem;
+  max-width: 720px;
+}
+
+.landing-hero h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 1.25rem;
+}
+
+.landing-hero p {
+  font-size: 1.15rem;
+  margin-bottom: 2rem;
+}
+
+.landing-cta {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.landing-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.landing-features .card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.landing-features .card h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.landing-footer {
+  margin-top: auto;
+  padding-top: 3rem;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 900px) {
@@ -735,5 +813,13 @@ a:hover {
 
   .form-row {
     flex-direction: column;
+  }
+
+  .landing-hero h1 {
+    font-size: 2.1rem;
+  }
+
+  .landing-nav {
+    margin-bottom: 2.5rem;
   }
 }

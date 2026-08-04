@@ -5,7 +5,9 @@ import { ToastProvider } from './contexts/ToastContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Sidebar } from './components/Sidebar';
 
+const Landing = lazy(() => import('./pages/Landing'));
 const Login = lazy(() => import('./pages/Login'));
+const Welcome = lazy(() => import('./pages/Welcome'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Students = lazy(() => import('./pages/Students'));
 const Courses = lazy(() => import('./pages/Courses'));
@@ -38,10 +40,12 @@ const App: React.FC = () => {
         <Router>
           <Suspense fallback={<PageLoader />}>
             <Routes>
+              <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/welcome" element={<ProtectedRoute><Welcome /></ProtectedRoute>} />
 
               <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/courses" element={<Courses />} />
                 <Route path="/assignments" element={<Assignments />} />
                 <Route path="/lectures" element={<Lectures />} />

@@ -31,7 +31,7 @@ export const Sidebar: React.FC = () => {
       </div>
 
       <nav className="nav-links">
-        <NavLink to="/" className={linkClass} end>
+        <NavLink to="/dashboard" className={linkClass} end>
           <LayoutDashboard size={20} /> Dashboard
         </NavLink>
         {canManage && (
