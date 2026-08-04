@@ -76,6 +76,9 @@ export const Sidebar: React.FC = () => {
         <button onClick={handleLogout} className="nav-link">
           <LogOut size={20} /> Logout
         </button>
+        <p className="muted" style={{ fontSize: '0.75rem', padding: '0.75rem 1rem 0 1rem', color: 'rgba(255,255,255,0.4)' }}>
+          © {new Date().getFullYear()} EduSMS
+        </p>
       </div>
     </div>
   );
