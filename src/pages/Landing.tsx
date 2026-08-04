@@ -34,7 +34,7 @@ const Landing: React.FC = () => {
           <Link to="/login">
             <button className="btn btn-secondary">Sign in</button>
           </Link>
-          <Link to="/login">
+          <Link to="/login?mode=signup">
             <button className="btn">Get started</button>
           </Link>
         </div>
@@ -47,7 +47,7 @@ const Landing: React.FC = () => {
           in one clean place — for teachers, admins and students alike.
         </p>
         <div className="landing-cta">
-          <Link to="/login">
+          <Link to="/login?mode=signup">
             <button className="btn">
               Create an account <ArrowRight size={18} />
             </button>
