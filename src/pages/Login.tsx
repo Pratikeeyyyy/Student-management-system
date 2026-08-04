@@ -22,22 +22,22 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [goWelcome, setGoWelcome] = useState(false);
+  const [goDashboard, setGoDashboard] = useState(false);
   const { login, register, currentUser } = useAuth();
   const navigate = useNavigate();
   const hasSubmitted = useRef(false);
 
   // If someone lands on the login page while already signed in, skip past it.
-  // The ref stops this from fighting the post-login redirect to /welcome.
+  // The ref stops this from fighting the post-login redirect to the dashboard.
   useEffect(() => {
     if (currentUser && !hasSubmitted.current) navigate('/dashboard', { replace: true });
   }, [currentUser, navigate]);
 
-  // After a fresh login/register, wait until the user is in context, then
-  // head to the welcome screen (avoids a bounce back to /login).
+  // After a fresh login/register, wait until the user is in context, then go
+  // straight to the dashboard (avoids a bounce back to /login).
   useEffect(() => {
-    if (currentUser && goWelcome) navigate('/welcome', { replace: true });
-  }, [currentUser, goWelcome, navigate]);
+    if (currentUser && goDashboard) navigate('/dashboard', { replace: true });
+  }, [currentUser, goDashboard, navigate]);
 
   const switchMode = (next: 'login' | 'signup') => {
     setError('');
@@ -56,7 +56,7 @@ export const Login: React.FC = () => {
       } else {
         await register(name, email, password, 'student');
       }
-      setGoWelcome(true);
+      setGoDashboard(true);
     } catch (err) {
       hasSubmitted.current = false;
       setError(friendlyError(err));
