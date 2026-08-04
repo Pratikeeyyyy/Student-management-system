@@ -1,0 +1,84 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- Helpers ---------------------------------------------------------
+    // Role is read from the matching users/<uid> document.
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isTeacher() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+    }
+
+    function isStaff() {
+      return isAdmin() || isTeacher();
+    }
+
+    // --- Users -----------------------------------------------------------
+    // Anyone signed in can read the directory (so the first signup can check
+    // whether an admin already exists). Only the owner or an admin writes it.
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create, update: if request.auth.uid == uid || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // --- Students --------------------------------------------------------
+    // Anyone signed in can see the roster. Staff edit it. Students can
+    // create/update only the record linked to their own account (signup).
+    match /students/{id} {
+      allow read: if signedIn();
+      allow create: if isStaff()
+        || (signedIn() && request.resource.data.uid == request.auth.uid);
+      allow update: if isStaff()
+        || (signedIn() && resource.data.uid == request.auth.uid);
+      allow delete: if isStaff();
+    }
+
+    // --- Courses & timetables -------------------------------------------
+    match /courses/{id} {
+      allow read: if signedIn();
+      allow write: if isStaff();
+    }
+
+    // --- Grades ----------------------------------------------------------
+    match /grades/{id} {
+      allow read: if signedIn();
+      allow write: if isStaff();
+    }
+
+    // --- Attendance ------------------------------------------------------
+    match /attendance/{id} {
+      allow read: if signedIn();
+      allow write: if isStaff();
+    }
+
+    // --- Assignments -----------------------------------------------------
+    match /assignments/{id} {
+      allow read: if signedIn();
+      allow write: if isStaff();
+    }
+
+    // Students may only submit for themselves.
+    match /assignment_submissions/{id} {
+      allow read: if signedIn() && (isStaff() || request.auth.uid == resource.data.studentId);
+      allow create: if signedIn() && request.resource.data.studentId == request.auth.uid;
+      allow update, delete: if isStaff();
+    }
+
+    // --- Lectures --------------------------------------------------------
+    match /lectures/{id} {
+      allow read: if signedIn();
+      allow write: if isStaff();
+    }
+  }
+}
