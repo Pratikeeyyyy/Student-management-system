@@ -3,6 +3,7 @@ import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, query, where } 
 import { db } from '../firebase';
 import { Modal } from '../components/Modal';
 import { useToast } from '../contexts/ToastContext';
+import { useConfirm } from '../hooks/useConfirm';
 import { Trash2, Edit, Award } from 'lucide-react';
 import type { Course, Student, Grade } from '../types';
 
@@ -19,6 +20,7 @@ export const Grades: React.FC = () => {
   const [score, setScore] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const { toast } = useToast();
+  const [confirmEl, confirm] = useConfirm();
 
   useEffect(() => {
     Promise.all([
@@ -89,7 +91,8 @@ export const Grades: React.FC = () => {
   };
 
   const handleDelete = async (grade: Grade) => {
-    if (!window.confirm(`Delete this ${grade.assessment} grade for ${studentName(grade.studentId)}?`)) return;
+    const ok = await confirm(`Delete this ${grade.assessment} grade for ${studentName(grade.studentId)}?`);
+    if (!ok) return;
     try {
       await deleteDoc(doc(db, 'grades', grade.id));
       toast('Grade deleted.');
@@ -193,6 +196,7 @@ export const Grades: React.FC = () => {
           </div>
         </form>
       </Modal>
+      {confirmEl}
     </div>
   );
 };

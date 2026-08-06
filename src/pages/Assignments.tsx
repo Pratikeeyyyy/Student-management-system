@@ -4,6 +4,7 @@ import { db } from '../firebase';
 import { Modal } from '../components/Modal';
 import { useToast } from '../contexts/ToastContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useConfirm } from '../hooks/useConfirm';
 import { Trash2, Edit, FileText, CheckCircle } from 'lucide-react';
 import type { Assignment, Course } from '../types';
 
@@ -21,6 +22,7 @@ export const Assignments: React.FC = () => {
   const [dueDate, setDueDate] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const { toast } = useToast();
+  const [confirmEl, confirm] = useConfirm();
 
   const canManage = userRole === 'admin' || userRole === 'teacher';
 
@@ -97,7 +99,8 @@ export const Assignments: React.FC = () => {
   };
 
   const handleDelete = async (assignment: Assignment) => {
-    if (!window.confirm(`Delete "${assignment.title}"?`)) return;
+    const ok = await confirm(`Delete "${assignment.title}"?`);
+    if (!ok) return;
     try {
       await deleteDoc(doc(db, 'assignments', assignment.id));
       toast('Assignment deleted.');
@@ -223,6 +226,7 @@ export const Assignments: React.FC = () => {
           </div>
         </form>
       </Modal>
+      {confirmEl}
     </div>
   );
 };

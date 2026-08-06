@@ -1,5 +1,7 @@
 import React, { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -18,16 +20,35 @@ const Assignments = lazy(() => import('./pages/Assignments'));
 const Lectures = lazy(() => import('./pages/Lectures'));
 
 const PageLoader = () => (
-  <div className="empty-state" style={{ paddingTop: '4rem' }}>Loading...</div>
+  <div className="page-loader">
+    <div className="spinner" />
+  </div>
 );
+
+const AnimatedOutlet = () => {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -12 }}
+        transition={{ duration: 0.22, ease: 'easeOut' }}
+      >
+        <Suspense fallback={<PageLoader />}>
+          <Outlet />
+        </Suspense>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
 
 const Layout = () => (
   <div className="app-container">
     <Sidebar />
     <main className="main-content">
-      <Suspense fallback={<PageLoader />}>
-        <Outlet />
-      </Suspense>
+      <AnimatedOutlet />
     </main>
   </div>
 );
@@ -57,6 +78,7 @@ const App: React.FC = () => {
             </Routes>
           </Suspense>
         </Router>
+        <Toaster richColors position="top-right" closeButton toastOptions={{ className: 'sonner-toast' }} />
       </ToastProvider>
     </AuthProvider>
   );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { BookOpen } from 'lucide-react';
+import { GraduationCap } from 'lucide-react';
 
 const friendlyError = (err: unknown) => {
   const msg = err instanceof Error ? err.message : 'Something went wrong.';
@@ -69,10 +69,12 @@ export const Login: React.FC = () => {
     <div className="app-container center">
       <div className="glass-panel animate-fade-in" style={{ width: '100%', maxWidth: '400px' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <BookOpen size={48} color="var(--primary-color)" />
+          <div className="login-logo">
+            <GraduationCap size={52} />
+          </div>
           <h2 style={{ marginTop: '1rem' }}>{mode === 'login' ? 'Welcome back' : 'Create an account'}</h2>
           <p className="muted">
-            {mode === 'login' ? 'Sign in to your EduSMS account' : 'Join as a student and get started'}
+            {mode === 'login' ? 'Sign in to your Learning with Pratik account' : 'Join as a student and get started'}
           </p>
         </div>
 

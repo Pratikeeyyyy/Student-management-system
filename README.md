@@ -1,4 +1,4 @@
-# EduSMS — Student Management System
+# Learning with Pratik — Student Management System
 
 A simple student management dashboard for schools: students, courses, enrollments,
 attendance, grades, assignments, lectures and a timetable. Data lives in

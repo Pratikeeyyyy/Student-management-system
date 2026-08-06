@@ -3,6 +3,7 @@ import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase
 import { db } from '../firebase';
 import { Modal } from '../components/Modal';
 import { useToast } from '../contexts/ToastContext';
+import { useConfirm } from '../hooks/useConfirm';
 import { Trash2, Edit, Users, UserCheck } from 'lucide-react';
 import type { Course, Student } from '../types';
 
@@ -19,6 +20,7 @@ export const Courses: React.FC = () => {
   const [activeCourse, setActiveCourse] = useState<Course | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const { toast } = useToast();
+  const [confirmEl, confirm] = useConfirm();
 
   const loadCourses = useCallback(async () => {
     setLoading(true);
@@ -60,7 +62,8 @@ export const Courses: React.FC = () => {
   };
 
   const handleDelete = async (course: Course) => {
-    if (!window.confirm(`Delete "${course.name}"? Any linked grades and attendance will be orphaned.`)) return;
+    const ok = await confirm(`Delete "${course.name}"? Any linked grades and attendance will be orphaned.`);
+    if (!ok) return;
     try {
       await deleteDoc(doc(db, 'courses', course.id));
       toast('Course deleted.');
@@ -197,6 +200,8 @@ export const Courses: React.FC = () => {
           </>
         )}
       </Modal>
+
+      {confirmEl}
     </div>
   );
 };

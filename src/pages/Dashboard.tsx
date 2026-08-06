@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { motion, useInView, animate } from 'framer-motion';
 import { Users, BookOpen, FileText, Download, ClipboardList, GraduationCap } from 'lucide-react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -13,6 +14,39 @@ interface Stats {
 }
 
 const emptyStats: Stats = { students: 0, courses: 0, assignments: 0, avgScore: 0 };
+
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1 } },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' as const } },
+};
+
+const CountUp: React.FC<{ value: number; decimals?: number; prefix?: string; suffix?: string }> = ({
+  value,
+  decimals = 0,
+  prefix = '',
+  suffix = '',
+}) => {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true });
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    if (!inView) return;
+    const controls = animate(0, value, {
+      duration: 0.9,
+      ease: 'easeOut',
+      onUpdate: v => setDisplay(Number(v.toFixed(decimals))),
+    });
+    return () => controls.stop();
+  }, [inView, value, decimals]);
+
+  return <span ref={ref}>{prefix}{display}{suffix}</span>;
+};
 
 export const Dashboard: React.FC = () => {
   const { currentUser, userRole } = useAuth();
@@ -90,6 +124,13 @@ export const Dashboard: React.FC = () => {
   const greeting = hours < 12 ? 'Good morning' : hours < 18 ? 'Good afternoon' : 'Good evening';
   const displayName = currentUser?.displayName || currentUser?.email?.split('@')[0] || 'there';
 
+  const statCards = [
+    { label: 'Students', value: stats.students, suffix: '', color: 'var(--primary-color)', icon: Users },
+    { label: 'Courses', value: stats.courses, suffix: '', color: 'var(--success-color)', icon: BookOpen },
+    { label: 'Assignments', value: stats.assignments, suffix: '', color: 'var(--warning-color)', icon: FileText },
+    { label: userRole === 'student' ? 'My average' : 'Average score', value: stats.avgScore, suffix: '%', color: 'var(--danger-color)', icon: GraduationCap },
+  ];
+
   return (
     <div className="animate-fade-in">
       <div className="header">
@@ -112,34 +153,50 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid-cards" style={{ marginBottom: '2.5rem' }}>
-        <div className="card">
-          <div className="card-title"><Users size={24} color="var(--primary-color)" /> Students</div>
-          <div className="card-value">{stats.students}</div>
-        </div>
-        <div className="card">
-          <div className="card-title"><BookOpen size={24} color="var(--success-color)" /> Courses</div>
-          <div className="card-value">{stats.courses}</div>
-        </div>
-        <div className="card">
-          <div className="card-title"><FileText size={24} color="var(--warning-color)" /> Assignments</div>
-          <div className="card-value">{stats.assignments}</div>
-        </div>
-        <div className="card">
-          <div className="card-title">
-            {userRole === 'student' ? <GraduationCap size={24} color="var(--danger-color)" /> : <GraduationCap size={24} color="var(--danger-color)" />}
-            {userRole === 'student' ? 'My average' : 'Average score'}
-          </div>
-          <div className="card-value">{stats.avgScore ? `${stats.avgScore}%` : '—'}</div>
-        </div>
-      </div>
+      <motion.div
+        className="grid-cards"
+        variants={container}
+        initial="hidden"
+        animate="show"
+        style={{ marginBottom: '2.5rem' }}
+      >
+        {statCards.map(card => (
+          <motion.div key={card.label} variants={item} className="card stat-card">
+            <div className="card-title">
+              <span className="stat-icon" style={{ background: `${card.color}1a`, color: card.color }}>
+                <card.icon size={22} />
+              </span>
+              {card.label}
+            </div>
+            <div className="card-value">
+              {card.label === (userRole === 'student' ? 'My average' : 'Average score') && stats.avgScore === 0 ? (
+                '—'
+              ) : (
+                <CountUp value={card.value} suffix={card.suffix} decimals={card.suffix === '%' ? 1 : 0} />
+              )}
+            </div>
+          </motion.div>
+        ))}
+      </motion.div>
 
       {recentAssignments.length > 0 && (
-        <div className="glass-panel" style={{ padding: '1.75rem' }}>
+        <motion.div
+          className="glass-panel"
+          style={{ padding: '1.75rem' }}
+          variants={container}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.2 }}
+        >
           <div className="section-title"><ClipboardList size={20} color="var(--primary-color)" /> Recent assignments</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {recentAssignments.map(a => (
-              <div key={a.id} className="card" style={{ padding: '1rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <motion.div
+                key={a.id}
+                variants={item}
+                className="card"
+                style={{ padding: '1rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}
+              >
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontWeight: 600 }}>{a.title}</div>
                   <div className="muted" style={{ fontSize: '0.9rem' }}>{a.course}</div>
@@ -149,10 +206,10 @@ export const Dashboard: React.FC = () => {
                     {new Date(a.dueDate) < new Date() ? 'overdue' : 'due'} {new Date(a.dueDate).toLocaleDateString()}
                   </span>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { db } from '../firebase';
 import { Modal } from '../components/Modal';
 import { useToast } from '../contexts/ToastContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useConfirm } from '../hooks/useConfirm';
 import { Trash2, Edit, Video, Clock, ExternalLink } from 'lucide-react';
 import type { Lecture, Course } from '../types';
 
@@ -21,6 +22,7 @@ export const Lectures: React.FC = () => {
   const [meetingLink, setMeetingLink] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const { toast } = useToast();
+  const [confirmEl, confirm] = useConfirm();
 
   const canManage = userRole === 'admin' || userRole === 'teacher';
 
@@ -84,7 +86,8 @@ export const Lectures: React.FC = () => {
   };
 
   const handleDelete = async (lecture: Lecture) => {
-    if (!window.confirm(`Delete the lecture "${lecture.topic}"?`)) return;
+    const ok = await confirm(`Delete the lecture "${lecture.topic}"?`);
+    if (!ok) return;
     try {
       await deleteDoc(doc(db, 'lectures', lecture.id));
       toast('Lecture deleted.');
@@ -192,6 +195,7 @@ export const Lectures: React.FC = () => {
           </div>
         </form>
       </Modal>
+      {confirmEl}
     </div>
   );
 };

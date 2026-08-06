@@ -1,8 +1,9 @@
 import React from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { motion } from "framer-motion";
 import {
-  BookOpen,
+  GraduationCap,
   Users,
   BookMarked,
   CheckSquare,
@@ -11,6 +12,7 @@ import {
   Video,
   Calendar,
   ArrowRight,
+  Sparkles,
 } from "lucide-react";
 
 const features = [
@@ -51,6 +53,16 @@ const features = [
   },
 ];
 
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08 } },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
+};
+
 const Landing: React.FC = () => {
   const { currentUser } = useAuth();
 
@@ -60,9 +72,18 @@ const Landing: React.FC = () => {
 
   return (
     <div className="landing">
-      <header className="landing-nav">
+      <div className="blob blob-one" />
+      <div className="blob blob-two" />
+      <div className="blob blob-three" />
+
+      <motion.header
+        className="landing-nav"
+        initial={{ opacity: 0, y: -16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="landing-logo">
-          <BookOpen size={26} color="var(--primary-color)" />
+          <GraduationCap size={28} />
           <span>Learning with Pratik</span>
         </div>
         <div style={{ display: "flex", gap: "0.75rem" }}>
@@ -70,42 +91,62 @@ const Landing: React.FC = () => {
             <button className="btn btn-secondary">Sign in</button>
           </Link>
           <Link to="/login?mode=signup">
-            <button className="btn">Get started</button>
+            <button className="btn btn-primary-glow">Get started</button>
           </Link>
         </div>
-      </header>
+      </motion.header>
 
-      <section className="landing-hero">
-        <h1>Student management.</h1>
-        <p className="muted">
+      <motion.section
+        className="landing-hero"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
+        <motion.div variants={item} className="landing-badge">
+          <Sparkles size={16} /> Modern school management
+        </motion.div>
+        <motion.h1 variants={item}>
+          Student management,
+          <br />
+          <span className="gradient-text">made delightful.</span>
+        </motion.h1>
+        <motion.p variants={item} className="muted">
           Learning with Pratik keeps your students, courses, attendance, grades
           and assignments in one clean place — for teachers, admins and students
           alike.
-        </p>
-        <div className="landing-cta">
+        </motion.p>
+        <motion.div variants={item} className="landing-cta">
           <Link to="/login?mode=signup">
-            <button className="btn">
+            <button className="btn btn-primary-glow">
               Create an account <ArrowRight size={18} />
             </button>
           </Link>
           <Link to="/login">
             <button className="btn btn-secondary">Sign in</button>
           </Link>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
-      <section className="landing-features">
+      <motion.section
+        className="landing-features"
+        variants={container}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+      >
         {features.map((f) => (
-          <div key={f.title} className="card">
-            <f.icon size={26} color="var(--primary-color)" />
+          <motion.div key={f.title} variants={item} className="card">
+            <span className="feature-icon">
+              <f.icon size={24} />
+            </span>
             <h3>{f.title}</h3>
             <p className="muted">{f.text}</p>
-          </div>
+          </motion.div>
         ))}
-      </section>
+      </motion.section>
 
       <footer className="landing-footer muted">
-        © {new Date().getFullYear()} EduSMS
+        © {new Date().getFullYear()} Learning with Pratik
       </footer>
     </div>
   );

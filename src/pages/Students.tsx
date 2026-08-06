@@ -3,6 +3,7 @@ import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase
 import { db } from '../firebase';
 import { Modal } from '../components/Modal';
 import { useToast } from '../contexts/ToastContext';
+import { useConfirm } from '../hooks/useConfirm';
 import { Trash2, Edit, Search, Users } from 'lucide-react';
 import type { Student } from '../types';
 
@@ -16,6 +17,7 @@ export const Students: React.FC = () => {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const { toast } = useToast();
+  const [confirmEl, confirm] = useConfirm();
 
   const loadStudents = useCallback(async () => {
     setLoading(true);
@@ -54,7 +56,8 @@ export const Students: React.FC = () => {
   };
 
   const handleDelete = async (student: Student) => {
-    if (!window.confirm(`Delete ${student.name}? This cannot be undone.`)) return;
+    const ok = await confirm(`Delete ${student.name}? This cannot be undone.`);
+    if (!ok) return;
     try {
       await deleteDoc(doc(db, 'students', student.id));
       toast('Student deleted.');
@@ -163,6 +166,8 @@ export const Students: React.FC = () => {
           </div>
         </form>
       </Modal>
+
+      {confirmEl}
     </div>
   );
 };
